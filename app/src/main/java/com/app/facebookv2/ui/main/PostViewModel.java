@@ -10,6 +10,14 @@ import com.app.facebookv2.model.PostModel;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,18 +31,33 @@ public class PostViewModel extends ViewModel {
     MutableLiveData<String> posts = new MutableLiveData<>();
 
     public void getPosts() {
-        PostsClient.getINSTANCE().getPosts().enqueue(new Callback<List<PostModel>>() {
+        Observable observable = PostsClient.getINSTANCE().getPosts()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+
+        Observer<List<PostModel>> observer = new Observer<List<PostModel>>() {
             @Override
-            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
-                postsMutableLiveData.setValue(response.body());
-                Log.i(TAG,"Response result  " + response.body());
+            public void onSubscribe(@NonNull Disposable d) {
+
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
-                Log.i(TAG,"Response error  " + t.getMessage());
-            //    posts.setValue("errr");
+            public void onNext(@NonNull List<PostModel> postModels) {
+                postsMutableLiveData.setValue(postModels);
             }
-        });
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                Log.d(TAG, "onError: "+ e);
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
+        //connect observable with observer
+        observable.subscribe(observer);
     }
 }
