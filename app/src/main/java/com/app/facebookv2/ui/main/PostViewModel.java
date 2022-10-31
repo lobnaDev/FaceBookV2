@@ -31,33 +31,34 @@ public class PostViewModel extends ViewModel {
     MutableLiveData<String> posts = new MutableLiveData<>();
 
     public void getPosts() {
-        Observable observable = PostsClient.getINSTANCE().getPosts()
+        Observable<List<PostModel>> observable = PostsClient.getINSTANCE().getPosts()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+        observable.subscribe(o->postsMutableLiveData.setValue(o),
+                e-> Log.d(TAG, "getPosts: "+ e));
 
-
-        Observer<List<PostModel>> observer = new Observer<List<PostModel>>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-
-            }
-
-            @Override
-            public void onNext(@NonNull List<PostModel> postModels) {
-                postsMutableLiveData.setValue(postModels);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-                Log.d(TAG, "onError: "+ e);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-        //connect observable with observer
-        observable.subscribe(observer);
+//        Observer<List<PostModel>> observer = new Observer<List<PostModel>>() {
+//            @Override
+//            public void onSubscribe(@NonNull Disposable d) {
+//
+//            }
+//
+//            @Override
+//            public void onNext(@NonNull List<PostModel> postModels) {
+//                postsMutableLiveData.setValue(postModels);
+//            }
+//
+//            @Override
+//            public void onError(@NonNull Throwable e) {
+//                Log.d(TAG, "onError: "+ e);
+//            }
+//
+//            @Override
+//            public void onComplete() {
+//
+//            }
+//        };
+//        //connect observable with observer
+//        observable.subscribe(observer);
     }
 }
